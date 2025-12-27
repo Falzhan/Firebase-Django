@@ -1,2 +1,8 @@
 <h1>{{blog_detail.title}} details</h1>
 {{blog_detail.content}}
+
+<div class="actions">
+    <a href="{% url 'blog_list' %}">Back to List</a>
+    <a href="{% url 'blog_update' blog_detail.id %}">Update</a>
+    <a href="{% url 'blog_delete' blog_detail.id %}">Delete</a>
+</div>

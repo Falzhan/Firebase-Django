@@ -1,5 +1,7 @@
 <h1>{{form_type}} post</h1>
 
+<a href="{% url 'blog_list' %}">Back to List</a>
+
 <form method="POST" action=".">
     {% csrf_token %}
     {{ form.as_p }}
