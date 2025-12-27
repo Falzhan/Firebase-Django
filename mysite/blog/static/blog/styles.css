@@ -1,0 +1,33 @@
+body {
+    font-family: sans-serif;
+    margin: 2em;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+a {
+    color: #038d03;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+form {
+    margin-top: 1em;
+}
+
+button {
+    background-color: #036e2c;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #10fca2;
+}

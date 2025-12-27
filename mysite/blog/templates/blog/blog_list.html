@@ -1,0 +1,22 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+
+<h2>My Blog List</h2>
+
+<a href="create/">
+    <button>Create New Post</button>
+</a>
+
+<ul>
+    {% for list in blog_list %}
+        <li>
+            <h3><a href="{{list.id}}">{{ list.title }}</a></h3> <p>{{list.content}}</p>
+            <div class="actions">
+                <a href="{{list.id}}/update/">Update</a>
+                <a href="{{list.id}}/delete/">Delete</a> 
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+
+{% endblock %}
