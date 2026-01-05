@@ -9,6 +9,13 @@ This Django project now includes a complete REST API for managing blog posts.
 http://127.0.0.1:8000/api/
 ```
 
+### Web Interface URLs (unchanged)
+- **Create Post**: `http://127.0.0.1:8000/create/`
+- **List Posts**: `http://127.0.0.1:8000/` or `http://127.0.0.1:8000/posts/`
+- **View Post**: `http://127.0.0.1:8000/{id}/`
+- **Update Post**: `http://127.0.0.1:8000/{id}/update/`
+- **Delete Post**: `http://127.0.0.1:8000/{id}/delete/`
+
 ### Available Endpoints
 
 1. **List all posts**
