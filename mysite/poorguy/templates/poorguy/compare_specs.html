@@ -1,0 +1,184 @@
+{% extends "poorguy/base_tech.html" %}
+{% load poorguy_extras %}
+{% load static %}
+
+{% block title %}Compare Products | Poor Guy's Tech Blog{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Compare Header -->
+    <div class="glass-card p-6">
+        <h1 class="text-3xl font-bold mb-4 flex items-center">
+            <i class="fas fa-balance-scale text-emerald-400 mr-3"></i>
+            Product Comparison
+        </h1>
+        
+        {% if review1 %}
+        <!-- Two columns: First product on left, selection on right -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Left Column: First Product (like view details but simpler) -->
+            <div class="space-y-6">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold mb-2">{{ review1.title }}</h2>
+                    <span class="{{ review1|get_grade_color }} px-4 py-2 rounded-full text-sm font-medium">
+                        {{ review1.grade }}-Tier
+                    </span>
+                    <div class="text-xl font-medium mt-3">{{ review1.price_php|format_price }}</div>
+                    <div class="text-sm text-gray-400 mt-1">Category: {{ review1.get_category_display }}</div>
+                </div>
+                
+                {% if review1.image %}
+                <div class="mt-4">
+                    <img src="{{ review1.image.url }}" alt="{{ review1.title }}" class="w-full h-48 object-cover rounded-lg">
+                </div>
+                {% endif %}
+                
+                {% if review1.specs %}
+                <div class="mt-4">
+                    <h3 class="text-lg font-semibold mb-3">Specifications</h3>
+                    <div class="space-y-2">
+                        {% for key, value in review1.specs.items %}
+                        <div class="flex justify-between border-b border-gray-700 pb-1">
+                            <span class="text-gray-400 font-medium">{{ key|title }}:</span>
+                            <span>{{ value }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Right Column: Select Second Product -->
+            <div class="space-y-6">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold mb-2">Select Second Product</h2>
+                    <span class="text-gray-400 text-sm">Choose from {{ review1.get_category_display }} category</span>
+                </div>
+                
+                <div class="space-y-4">
+                    <select id="compare-select-2" class="glass-card w-full px-4 py-3 rounded-lg text-sm">
+                        <option value="">Select second product</option>
+                        {% for review in reviewed_items %}
+                        {% if review.category == review1.category and review.id != review1.id %}
+                        <option value="{{ review.id }}">{{ review.title }} ({{ review.grade }}-Tier)</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    
+                    <button id="compare-button" class="w-full bg-emerald-600 text-white px-6 py-3 rounded-lg hover:bg-emerald-700 transition-colors font-medium">
+                        <i class="fas fa-search mr-2"></i>
+                        Compare Specifications
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <p class="text-gray-600">Select two products to compare their specifications.</p>
+        {% endif %}
+    </div>
+
+    <!-- Comparison Results -->
+    <section id="comparison-section" class="hidden">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-chart-bar text-emerald-400 mr-2"></i>
+            Specification Comparison
+        </h2>
+        <div class="glass-card p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-gray-700">
+                            <th class="p-3 text-left">Specification</th>
+                            <th class="p-3 text-center" id="product1-name">Product 1</th>
+                            <th class="p-3 text-center" id="product2-name">Product 2</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparison-table-body">
+                        <!-- Comparison data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% csrf_token %}
+<script>
+document.getElementById('compare-button').addEventListener('click', function() {
+    const id1 = '{{ review1.id|default:"" }}'; // First product is pre-selected
+    const id2 = document.getElementById('compare-select-2').value;
+    
+    if (!id1) {
+        alert('No first product selected. Please go back and select a product to compare.');
+        return;
+    }
+    
+    if (!id2) {
+        alert('Please select a second product to compare');
+        return;
+    }
+    
+    console.log('Making AJAX request with id1:', id1, 'id2:', id2);
+    
+    // Use a more robust URL construction
+    const baseUrl = '{% url "poorguy:compare_specs" %}';
+    const url = `${baseUrl}?id1=${encodeURIComponent(id1)}&id2=${encodeURIComponent(id2)}`;
+    
+    console.log('Request URL:', url);
+    
+    // Add CSRF token for security
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]');
+    const headers = {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    
+    if (csrftoken) {
+        headers['X-CSRFToken'] = csrftoken.value;
+    }
+    
+    fetch(url, {
+        method: 'GET',
+        headers: headers
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Received data:', data);
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+        
+            // Update product names
+            document.getElementById('product1-name').textContent = data.review1_title;
+            document.getElementById('product2-name').textContent = data.review2_title;
+            
+            // Build comparison table
+            const tbody = document.getElementById('comparison-table-body');
+            tbody.innerHTML = data.comparison_data.map(item => `
+                <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                    <td class="p-3 font-medium capitalize">${item.key}</td>
+                    <td class="p-3 text-center ${item.same ? 'text-green-600' : 'text-emerald-600'}">
+                        ${item.value1}
+                    </td>
+                    <td class="p-3 text-center ${item.same ? 'text-green-600' : 'text-emerald-600'}">
+                        ${item.value2}
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('comparison-section').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load comparison data: ' + error.message);
+        });
+});
+</script>
+{% endblock %}

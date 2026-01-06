@@ -5,7 +5,7 @@ A Django starter template as per the docs: https://docs.djangoproject.com/en/5.0
 
 1. Activate the Virtual Environment
 For Windows:
-venv\Scripts\activate.bat
+.venv\Scripts\activate.bat
 
 For Unix/Linux/Mac:
 source source/bin/activate

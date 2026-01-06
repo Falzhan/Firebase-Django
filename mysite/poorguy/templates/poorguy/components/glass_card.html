@@ -1,0 +1,6 @@
+{# Glass Card Component #}
+{% load poorguy_extras %}
+
+<div class="glass-card {% if extra_classes %}{{ extra_classes }}{% endif %}">
+    {% block content %}{% endblock %}
+</div>

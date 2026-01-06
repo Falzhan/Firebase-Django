@@ -1,0 +1,200 @@
+{% extends 'poorguy/base_tech.html' %}
+{% load poorguy_extras %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6">
+    <div class="glass-card p-8">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-A0C878 to-DDEB9D mb-4">
+                {{ title }}
+            </h1>
+            <p class="text-gray-600">Poor Guy's Tech Blog - {{ action }} a review</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-500 text-white p-4 rounded-lg mb-6">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Title -->
+            <div class="space-y-2">
+                <label for="{{ form.title.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.title.label }}
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.title.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Price -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label for="{{ form.price_php.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                        {{ form.price_php.label }}
+                    </label>
+                    {{ form.price_php }}
+                    {% if form.price_php.errors %}
+                        <div class="text-red-600 text-sm">
+                            {% for error in form.price_php.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="space-y-2">
+                    <label for="{{ form.grade.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                        {{ form.grade.label }}
+                    </label>
+                    {{ form.grade }}
+                    {% if form.grade.errors %}
+                        <div class="text-red-600 text-sm">
+                            {% for error in form.grade.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="space-y-2">
+                <label for="{{ form.category.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.category.label }}
+                </label>
+                {{ form.category }}
+                {% if form.category.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.category.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Specifications -->
+            <div class="space-y-2">
+                <label for="{{ form.specs.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.specs.label }}
+                </label>
+                <div class="text-sm text-gray-600 mb-2">
+                    <strong>Format:</strong> JSON object with key-value pairs<br>
+                    <strong>Example:</strong> {"impedance": "32", "driver": "50mm", "battery": "24h"}
+                </div>
+                {{ form.specs }}
+                {% if form.specs.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.specs.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Cover Image -->
+            <div class="space-y-2">
+                <label for="{{ form.cover_image.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.cover_image.label }}
+                </label>
+                <div class="text-sm text-gray-600 mb-2">
+                    <strong>Image Guidelines:</strong><br>
+                    • Format: JPG, PNG, or WebP<br>
+                    • Size: Maximum 2MB<br>
+                    • Dimensions: Recommended 1200x742px or similar aspect ratio<br>
+                    • Quality: High resolution for best display
+                </div>
+                {% if review and review.cover_image %}
+                    <div class="mb-3">
+                        <img src="{{ review.cover_image.url }}" alt="{{ review.title }} cover" class="w-32 h-32 object-cover rounded-lg border border-gray-300">
+                    </div>
+                {% endif %}
+                {{ form.cover_image }}
+                {% if form.cover_image.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.cover_image.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Verdict -->
+            <div class="space-y-2">
+                <label for="{{ form.verdict.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.verdict.label }}
+                </label>
+                <div class="text-sm text-gray-600 mb-2">
+                    <strong>Tip:</strong> Keep it concise - the TL;DR summary of your review
+                </div>
+                {{ form.verdict }}
+                {% if form.verdict.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.verdict.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Full Review -->
+            <div class="space-y-2">
+                <label for="{{ form.content.id_for_label }}" class="block text-lg font-medium text-gray-700">
+                    {{ form.content.label }}
+                </label>
+                <div class="text-sm text-gray-600 mb-2">
+                    <strong>Write:</strong> Detailed analysis, pros/cons, personal experience, etc.
+                </div>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div class="text-red-600 text-sm">
+                        {% for error in form.content.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Wishlist Toggle -->
+            <div class="space-y-2">
+                <div class="flex items-center">
+                    {{ form.is_wishlist }}
+                    <label for="{{ form.is_wishlist.id_for_label }}" class="ml-2 text-lg font-medium text-gray-700">
+                        {{ form.is_wishlist.label }}
+                    </label>
+                </div>
+                <div class="text-sm text-gray-600">
+                    Check this if you want to add this item to your wishlist instead of a full review
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-6 border-t border-green-200/50">
+                <button type="submit" class="w-full bg-gradient-to-r from-A0C878 to-DDEB9D text-gray-800 py-3 px-6 rounded-lg hover:from-A0C878 hover:to-A0C878 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-A0C878 focus:ring-offset-2">
+                    {{ action }} Review
+                </button>
+            </div>
+        </form>
+
+        <!-- Back Button -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'poorguy:tech_feed' %}" class="text-A0C878 hover:text-DDEB9D transition-colors">
+                ← Back to Tech Feed
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

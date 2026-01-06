@@ -1,0 +1,35 @@
+{# Specification Table Component #}
+{% load poorguy_extras %}
+
+<div class="overflow-x-auto">
+    <table class="w-full text-sm">
+        <thead>
+            <tr class="border-b border-gray-700">
+                <th class="p-3 text-left">Specification</th>
+                {% if review1 %}
+                <th class="p-3 text-center">{{ review1.title|truncatechars:20 }}</th>
+                {% endif %}
+                {% if review2 %}
+                <th class="p-3 text-center">{{ review2.title|truncatechars:20 }}</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in comparison_data %}
+            <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                <td class="p-3 font-medium capitalize">{{ item.key }}</td>
+                {% if review1 %}
+                <td class="p-3 text-center {{ item|spec_diff_class:item.value1 }}">
+                    {{ item.value1|format_spec_value }}
+                </td>
+                {% endif %}
+                {% if review2 %}
+                <td class="p-3 text-center {{ item|spec_diff_class:item.value2 }}">
+                    {{ item.value2|format_spec_value }}
+                </td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

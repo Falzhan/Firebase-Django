@@ -1,0 +1,163 @@
+{% extends "poorguy/base_tech.html" %}
+{% load poorguy_extras %}
+
+{% block title %}{{ review.title }} | Poor Guy's Tech Blog{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Review Header -->
+    <div class="glass-card p-6">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div class="flex-1">
+                <h1 class="text-3xl font-bold mb-2">{{ review.title }}</h1>
+                <div class="flex items-center mb-4 space-x-4">
+                    <span class="{{ review|get_grade_color }} text-lg font-semibold px-3 py-1 rounded-full">
+                        {{ review.grade }}-Tier
+                    </span>
+                    <span class="text-lg font-medium text-gray-600">
+                        {{ review.get_category_display }}
+                    </span>
+                    <span class="text-xl font-medium mr-4">
+                        {{ review.price_php|format_price }}
+                    </span>
+                    <span class="text-sm text-gray-400">
+                        {{ review.created_at|format_timestamp }}
+                    </span>
+                </div>
+                <p class="text-2xl text-green-400 font-bold mb-2">
+                    {{ review.verdict }}
+                </p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'poorguy:compare_specs' %}?id1={{ review.id }}"
+                       class="glass-card px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors">
+                        <i class="fas fa-balance-scale mr-2"></i>
+                        Compare
+                    </a>
+                    <div class="flex space-x-2">
+                        <a href="{% url 'poorguy:edit_review' review.id %}"
+                           class="glass-card px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition-colors">
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit
+                        </a>
+                        <a href="{% url 'poorguy:delete_review' review.id %}"
+                           class="glass-card px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                            <i class="fas fa-trash mr-2"></i>
+                            Delete
+                        </a>
+                    </div>
+                    {% if review.is_wishlist %}
+                    <button class="glass-card px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors">
+                        <i class="fas fa-heart mr-2"></i>
+                        Wishlist
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Review Image -->
+    {% if review.cover_image %}
+    <section>
+        <div class="glass-card p-6">
+            <div class="mb-4 text-sm text-gray-400">
+                Image path: {{ review.cover_image.url }}
+            </div>
+            <img src="{{ review.cover_image.url }}"
+                 alt="{{ review.title }} cover image"
+                 class="w-full h-auto rounded-lg object-cover max-h-[600px] bg-gray-800 border border-gray-600"
+                 style="max-height: 600px; object-fit: contain;"
+                 onerror="this.style.display='none'; this.parentNode.querySelector('.image-error-msg').style.display='block';">
+            <div class="image-error-msg text-red-400 text-center py-8" style="display: none;">
+                Image not found or failed to load
+            </div>
+        </div>
+    </section>
+    {% else %}
+    <section>
+        <div class="glass-card p-6 text-center text-gray-400">
+            No cover image available
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Specifications Section -->
+    {% if review.specs %}
+    <section>
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-cogs text-emerald-400 mr-2"></i>
+            Specifications
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for key, value in review.specs.items %}
+            <div class="glass-card p-4">
+                <div class="text-sm font-medium text-gray-300 capitalize mb-1">{{ key }}</div>
+                <div class="text-lg font-semibold text-green-500">{{ value|format_spec_value }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+    
+    <!-- Review Content -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-pencil-alt text-green-400 mr-2"></i>
+            Full Review
+        </h2>
+        <div class="glass-card p-6">
+            <div class="prose prose-invert max-w-none">
+                {{ review.content|linebreaks }}
+            </div>
+        </div>
+    </section>
+    
+</div>
+
+<script>
+document.getElementById('compare-button').addEventListener('click', function() {
+    const id1 = document.getElementById('compare-select-1').value;
+    const id2 = document.getElementById('compare-select-2').value;
+    
+    if (!id1 || !id2 || id1 === id2) {
+        alert('Please select two different products to compare');
+        return;
+    }
+    
+    fetch(`{% url 'poorguy:compare_specs' %}?id1=${id1}&id2=${id2}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            
+            // Update product names
+            document.getElementById('product1-name').textContent = data.review1_title;
+            document.getElementById('product2-name').textContent = data.review2_title;
+            
+            // Build comparison table
+            const tbody = document.getElementById('comparison-table-body');
+            tbody.innerHTML = data.comparison_data.map(item => `
+                <tr class="border-b border-gray-700 hover:bg-gray-800 transition-colors">
+                    <td class="p-3 font-medium capitalize">${item.key}</td>
+                    <td class="p-3 text-center ${item.same ? 'text-green-600' : 'text-emerald-600'}">
+                        ${item.value1}
+                    </td>
+                    <td class="p-3 text-center ${item.same ? 'text-green-600' : 'text-emerald-600'}">
+                        ${item.value2}
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('comparison-results').classList.remove('hidden');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load comparison data');
+        });
+});
+</script>
+{% endblock %}
